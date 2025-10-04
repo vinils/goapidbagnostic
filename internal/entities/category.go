@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -19,4 +20,12 @@ func NewCategory(name string) (*category, error) {
 	}
 
 	return category, nil
+}
+
+func (c *category) IsValid() error {
+	if len(c.Name) < 1 {
+		return fmt.Errorf("name is required")
+	}
+
+	return nil
 }
