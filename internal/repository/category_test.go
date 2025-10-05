@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"os"
 	"regexp"
 	"testing"
 
@@ -10,6 +11,41 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+type testData struct {
+	database *gorm.DB
+	mock     sqlmock.Sqlmock
+}
+
+var test testData
+
+func TestMain(m *testing.M) {
+
+	sqlDB, mock, err := sqlmock.New()
+	if err != nil {
+		panic(err)
+	}
+
+	// 2. Create a GORM DB instance using the mock connection and a dialector
+	gormDB, err := gorm.Open(postgres.New(postgres.Config{
+		Conn: sqlDB,
+	}), &gorm.Config{})
+
+	if err != nil {
+		panic(err)
+	}
+
+	test = testData{
+		database: gormDB,
+		mock:     mock,
+	}
+
+	// Run all tests
+	code := m.Run()
+
+	sqlDB.Close()
+	os.Exit(code)
+}
 
 func TestNewCategory(test *testing.T) {
 	var gormDb *gorm.DB = nil
@@ -21,33 +57,22 @@ func TestNewCategory(test *testing.T) {
 }
 
 func TestCategoryCreate(t *testing.T) {
-	// 1. Create a mock database connection using go-sqlmock
-	sqlDB, mock, err := sqlmock.New()
-	assert.NoError(t, err)
-	defer sqlDB.Close()
-
-	// 2. Create a GORM DB instance using the mock connection and a dialector
-	gormDB, err := gorm.Open(postgres.New(postgres.Config{
-		Conn: sqlDB,
-	}), &gorm.Config{})
-	assert.NoError(t, err)
-
 	// 3. Initialize your repository with the GORM DB instance
-	repo := NewCategory(gormDB)
+	repo := NewCategory(test.database)
 
 	// 4. Define the expected SQL interactions
 	category := entity.NewCategory("name")
-	mock.ExpectBegin() // GORM often starts a transaction for create operations
-	mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "categories" ("name","created_at","updated_at") VALUES ($1,$2,$3)`)).
+	test.mock.ExpectBegin() // GORM often starts a transaction for create operations
+	test.mock.ExpectExec(regexp.QuoteMeta(`INSERT INTO "categories" ("name","created_at","updated_at") VALUES ($1,$2,$3)`)).
 		WithArgs(category.Name, category.CreatedAt, category.UpdatedAt).
 		WillReturnResult(sqlmock.NewResult(1, 1)) // Simulate a successful insert
-	mock.ExpectCommit() // GORM commits the transaction
+	test.mock.ExpectCommit() // GORM commits the transaction
 
 	// 5. Call the method under test
-	err = repo.Create(&category)
+	err := repo.Create(&category)
 
 	// 6. Assert the results and verify expectations
 	assert.NoError(t, err)
-	err = mock.ExpectationsWereMet()
+	err = test.mock.ExpectationsWereMet()
 	assert.NoError(t, err, "Unmet expectations: %v", err)
 }
