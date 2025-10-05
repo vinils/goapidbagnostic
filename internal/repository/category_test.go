@@ -71,7 +71,7 @@ func TestCategoryCreate(t *testing.T) {
 	test.mock.ExpectCommit() // GORM commits the transaction
 
 	// 5. Call the method under test
-	err := repo.Create(&category)
+	err := repo.Create(category)
 
 	// 6. Assert the results and verify expectations
 	assert.NoError(t, err)
