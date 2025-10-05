@@ -1,2 +1,0 @@
-remove return with * from category and repository
-add category repository and mock tests
