@@ -5,15 +5,15 @@ import (
 	"time"
 )
 
-type category struct {
+type Category struct {
 	ID        uint      `json:"id"`
 	Name      string    `json:"name"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func NewCategory(name string) category {
-	category := category{
+func NewCategory(name string) Category {
+	category := Category{
 		Name:      name,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -22,7 +22,7 @@ func NewCategory(name string) category {
 	return category
 }
 
-func (c category) IsValid() error {
+func (c Category) IsValid() error {
 	if len(c.Name) < 1 {
 		return fmt.Errorf("name is required")
 	}

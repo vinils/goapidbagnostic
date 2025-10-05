@@ -8,7 +8,7 @@ import (
 
 func TestNewCategory(test *testing.T) {
 	myname := "myname"
-	expected := category{Name: myname}
+	expected := Category{Name: myname}
 	actual := NewCategory(myname)
 
 	assert.Equal(test, actual.Name, expected.Name)
