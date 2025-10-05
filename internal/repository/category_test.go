@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"os"
 	"regexp"
 	"testing"
@@ -99,6 +100,25 @@ func TestCategoryList(t *testing.T) {
 	// 6. Assert the results and verify expectations
 	assert.NoError(t, err)
 	assert.Equal(t, expected, actual)
+	err = test.mock.ExpectationsWereMet()
+	assert.NoError(t, err, "Unmet expectations: %v", err)
+}
+
+func TestCategoryList_WhenError(t *testing.T) {
+	// 3. Initialize your repository with the GORM DB instance
+	repo := NewCategory(test.database)
+
+	// 4. Define the expected SQL interactions
+	expectedErr := errors.New("generic error")
+	test.mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "categories"`)).
+		WillReturnError(expectedErr)
+
+	// 5. Call the method under test
+	actual, err := repo.List()
+
+	// 6. Assert the results and verify expectations
+	assert.Nil(t, actual)
+	assert.EqualError(t, err, expectedErr.Error())
 	err = test.mock.ExpectationsWereMet()
 	assert.NoError(t, err, "Unmet expectations: %v", err)
 }
