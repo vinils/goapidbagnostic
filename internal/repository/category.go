@@ -9,6 +9,9 @@ type category struct {
 	db *gorm.DB
 }
 
+// Ensure that category implements the ICategory interface.
+var _ ICategory = category{}
+
 func NewCategory(db *gorm.DB) category {
 	return category{db: db}
 }
