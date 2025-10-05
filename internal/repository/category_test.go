@@ -4,6 +4,7 @@ import (
 	"os"
 	"regexp"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
@@ -73,6 +74,31 @@ func TestCategoryCreate(t *testing.T) {
 
 	// 6. Assert the results and verify expectations
 	assert.NoError(t, err)
+	err = test.mock.ExpectationsWereMet()
+	assert.NoError(t, err, "Unmet expectations: %v", err)
+}
+
+func TestCategoryList(t *testing.T) {
+	// 3. Initialize your repository with the GORM DB instance
+	repo := NewCategory(test.database)
+
+	// 4. Define the expected SQL interactions
+	expected := []entity.Category{
+		{Name: "name1", CreatedAt: time.Now(), UpdatedAt: time.Now()},
+		{Name: "name2", CreatedAt: time.Now(), UpdatedAt: time.Now()},
+	}
+	rows := sqlmock.NewRows([]string{"name", "created_at", "updated_at"}).
+		AddRow(expected[0].Name, expected[0].CreatedAt, expected[0].UpdatedAt).
+		AddRow(expected[1].Name, expected[1].CreatedAt, expected[1].UpdatedAt)
+	test.mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "categories"`)).
+		WillReturnRows(rows)
+
+	// 5. Call the method under test
+	actual, err := repo.List()
+
+	// 6. Assert the results and verify expectations
+	assert.NoError(t, err)
+	assert.Equal(t, expected, actual)
 	err = test.mock.ExpectationsWereMet()
 	assert.NoError(t, err, "Unmet expectations: %v", err)
 }
