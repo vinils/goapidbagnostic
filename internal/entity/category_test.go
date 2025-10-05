@@ -9,15 +9,14 @@ import (
 func TestNewCategory(test *testing.T) {
 	myname := "myname"
 	expected := category{Name: myname}
-	actual, err := NewCategory(myname)
+	actual := NewCategory(myname)
 
-	assert.Nil(test, err, "error while creating category")
 	assert.Equal(test, actual.Name, expected.Name)
 }
 
 func TestNewCategoryIsValid_WhenNotValid(test *testing.T) {
 	myname := ""
-	actual, _ := NewCategory(myname)
+	actual := NewCategory(myname)
 	err := actual.IsValid()
 
 	assert.NotNil(test, err, "Expected an error, but got nil")
@@ -26,7 +25,7 @@ func TestNewCategoryIsValid_WhenNotValid(test *testing.T) {
 
 func TestNewCategoryIsValid_WhenIsValid(test *testing.T) {
 	myname := "lengthBiggerThan1"
-	actual, _ := NewCategory(myname)
+	actual := NewCategory(myname)
 	err := actual.IsValid()
 
 	assert.Nil(test, err, "Expected nil, but got error")

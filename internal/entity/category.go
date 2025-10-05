@@ -12,14 +12,14 @@ type category struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func NewCategory(name string) (*category, error) {
-	category := &category{
+func NewCategory(name string) category {
+	category := category{
 		Name:      name,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 
-	return category, nil
+	return category
 }
 
 func (c category) IsValid() error {
