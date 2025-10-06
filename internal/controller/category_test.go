@@ -37,12 +37,11 @@ func TestCreateCategory(t *testing.T) {
 	// 2. Create a new CategoryController instance
 	controller := NewCategory()
 
-	categoryName := "anyname"
 	expectedStatus := http.StatusCreated
-	expectedBody := entity.Category{Name: categoryName, CreatedAt: time.Time{}, UpdatedAt: time.Time{}}
+	requestBody := struct{ Name string }{Name: "anyname"}
+	expectedBody := entity.Category{Name: requestBody.Name, CreatedAt: time.Time{}, UpdatedAt: time.Time{}}
 
 	// Convert request body to JSON
-	requestBody := entity.NewCategory(categoryName)
 	body, _ := json.Marshal(requestBody)
 	req, _ := http.NewRequest(http.MethodPost, "/any", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -76,11 +75,11 @@ func TestCreateCategory_WhenInvalidRequired(t *testing.T) {
 	// 2. Create a new CategoryController instance
 	controller := NewCategory()
 
-	invalidCategoryName := ""
 	expectedErrorStatus := http.StatusBadRequest
 
 	// Convert request body to JSON
-	requestBody := entity.NewCategory(invalidCategoryName)
+	invalidCategoryName := ""
+	requestBody := struct{ Name string }{Name: invalidCategoryName}
 	body, _ := json.Marshal(requestBody)
 	req, _ := http.NewRequest(http.MethodPost, "/any", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
@@ -116,7 +115,7 @@ func TestCreateCategory_WhenCreateError(t *testing.T) {
 	expectedError := errors.New(expectedErrorMsg)
 
 	// Convert request body to JSON
-	requestBody := entity.NewCategory("anyname")
+	requestBody := struct{ Name string }{Name: "anyname"}
 	body, _ := json.Marshal(requestBody)
 	req, _ := http.NewRequest(http.MethodPost, "/any", bytes.NewBuffer(body))
 	req.Header.Set("Content-Type", "application/json")
