@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -15,12 +14,12 @@ import (
 )
 
 type repositoryMock struct {
-	create func(entity.Category) error
+	create func(entity.Category) (entity.Category, error)
 	list   func() ([]entity.Category, error)
 }
 
-func (r repositoryMock) List() ([]entity.Category, error) { return r.list() }
-func (r repositoryMock) Create(c entity.Category) error   { return r.create(c) }
+func (r repositoryMock) List() ([]entity.Category, error)                  { return r.list() }
+func (r repositoryMock) Create(c entity.Category) (entity.Category, error) { return r.create(c) }
 
 func TestNewCategory(test *testing.T) {
 
@@ -39,7 +38,7 @@ func TestCreateCategory(t *testing.T) {
 
 	expectedStatus := http.StatusCreated
 	requestBody := struct{ Name string }{Name: "anyname"}
-	expectedBody := entity.Category{Name: requestBody.Name, CreatedAt: time.Time{}, UpdatedAt: time.Time{}}
+	exptectedBody := entity.NewCategory(requestBody.Name)
 
 	// Convert request body to JSON
 	body, _ := json.Marshal(requestBody)
@@ -54,7 +53,9 @@ func TestCreateCategory(t *testing.T) {
 	c.Request = req
 
 	// Call the controller method
-	repo := repositoryMock{create: func(c entity.Category) error { return nil }}
+	repo := repositoryMock{create: func(c entity.Category) (entity.Category, error) {
+		return exptectedBody, nil
+	}}
 	controller.Create(c, repo)
 
 	// Assert the HTTP status code
@@ -65,7 +66,9 @@ func TestCreateCategory(t *testing.T) {
 	var actualCategory entity.Category
 	err := json.Unmarshal(w.Body.Bytes(), &actualCategory)
 	assert.NoError(t, err)
-	assert.Equal(t, expectedBody.Name, actualCategory.Name)
+	assert.Equal(t, exptectedBody.Name, actualCategory.Name)
+	assert.True(t, exptectedBody.CreatedAt.Equal(actualCategory.CreatedAt))
+	assert.True(t, exptectedBody.UpdatedAt.Equal(actualCategory.UpdatedAt))
 }
 
 func TestCreateCategory_WhenInvalidRequired(t *testing.T) {
@@ -92,7 +95,7 @@ func TestCreateCategory_WhenInvalidRequired(t *testing.T) {
 	c.Request = req
 
 	// Call the controller method
-	repo := repositoryMock{create: func(c entity.Category) error { return nil }}
+	repo := repositoryMock{create: func(c entity.Category) (entity.Category, error) { return entity.Category{}, nil }}
 	controller.Create(c, repo)
 
 	// Assert the HTTP status code
@@ -128,7 +131,7 @@ func TestCreateCategory_WhenCreateError(t *testing.T) {
 	c.Request = req
 
 	// Call the controller method
-	repo := repositoryMock{create: func(c entity.Category) error { return expectedError }}
+	repo := repositoryMock{create: func(c entity.Category) (entity.Category, error) { return entity.Category{}, expectedError }}
 	controller.Create(c, repo)
 
 	// Assert the HTTP status code

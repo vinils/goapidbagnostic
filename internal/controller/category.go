@@ -35,10 +35,12 @@ func (c category) Create(ctx *gin.Context, repo repository.ICategory) {
 		return
 	}
 
-	if err := repo.Create(category); err != nil {
+	createdCategory, err := repo.Create(category)
+
+	if err != nil {
 		sendError(ctx, http.StatusBadRequest, err)
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, category)
+	ctx.JSON(http.StatusCreated, createdCategory)
 }

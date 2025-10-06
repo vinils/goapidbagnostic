@@ -16,8 +16,9 @@ func NewCategory(db *gorm.DB) category {
 	return category{db: db}
 }
 
-func (r category) Create(category entity.Category) error {
-	return r.db.Create(&category).Error
+func (r category) Create(category entity.Category) (entity.Category, error) {
+	err := r.db.Create(&category).Error
+	return category, err
 }
 
 func (r category) List() ([]entity.Category, error) {
