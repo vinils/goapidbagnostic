@@ -28,14 +28,14 @@ func (c category) Create(ctx *gin.Context, repo repository.ICategory) {
 		return
 	}
 
-	category := entity.NewCategory(body.Name)
+	newCategory := entity.NewCategory(body.Name)
 
-	if err := category.IsValid(); err != nil {
+	if err := newCategory.IsValid(); err != nil {
 		sendError(ctx, http.StatusBadRequest, err)
 		return
 	}
 
-	createdCategory, err := repo.Create(category)
+	createdCategory, err := repo.Create(newCategory)
 
 	if err != nil {
 		sendError(ctx, http.StatusBadRequest, err)
