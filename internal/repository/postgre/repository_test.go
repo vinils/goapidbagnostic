@@ -1,4 +1,4 @@
-package repository
+package postgre
 
 import (
 	"errors"
@@ -53,7 +53,7 @@ func TestNewRepositoryOpenConnection_WhenSuccess(test *testing.T) {
 		return gormDb, nil
 	}
 
-	expected := repository{
+	expected := repo{
 		database:         gormDb,
 		connectionConfig: cnnConfig,
 	}

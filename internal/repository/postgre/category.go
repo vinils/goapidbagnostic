@@ -1,7 +1,8 @@
-package repository
+package postgre
 
 import (
 	"github.com/vinils/goapitemplate/internal/entity"
+	"github.com/vinils/goapitemplate/internal/repository"
 	"gorm.io/gorm"
 )
 
@@ -10,7 +11,7 @@ type category struct {
 }
 
 // Ensure that category implements the ICategory interface.
-var _ ICategory = category{}
+var _ repository.ICategory = category{}
 
 func NewCategory(db *gorm.DB) category {
 	return category{db: db}

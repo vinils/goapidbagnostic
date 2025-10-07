@@ -1,4 +1,4 @@
-package repository
+package postgre
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type repository struct {
+type repo struct {
 	connectionConfig ConnectionConfig
 	database         *gorm.DB
 }
@@ -21,13 +21,13 @@ type ConnectionConfig struct {
 	Password string
 }
 
-func NewReposotiry(cnnConfig ConnectionConfig) (*repository, error) {
+func NewReposotiry(cnnConfig ConnectionConfig) (*repo, error) {
 	return newReposotiry(cnnConfig, gorm.Open)
 }
 
 type openConnection func(gorm.Dialector, ...gorm.Option) (*gorm.DB, error)
 
-func newReposotiry(cnnConfig ConnectionConfig, openConnection openConnection) (*repository, error) {
+func newReposotiry(cnnConfig ConnectionConfig, openConnection openConnection) (*repo, error) {
 	cnnString := getConnectionString(cnnConfig)
 
 	db, err := openConnection(postgres.Open(cnnString), &gorm.Config{})
@@ -36,7 +36,7 @@ func newReposotiry(cnnConfig ConnectionConfig, openConnection openConnection) (*
 		return nil, err
 	}
 
-	repo := &repository{
+	repo := &repo{
 		database:         db,
 		connectionConfig: cnnConfig,
 	}

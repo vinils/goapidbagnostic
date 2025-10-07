@@ -1,4 +1,4 @@
-package repository
+package postgre
 
 import (
 	"errors"
