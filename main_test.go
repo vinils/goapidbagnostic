@@ -10,12 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func diffTimeAndMaxDiffSeconds(time time.Time, actual timeStruct) (float64, float64) {
-	diff := time.Sub(actual.Time).Seconds()
-	maxDiffSeconds := float64(10)
-	return diff, maxDiffSeconds
-}
-
 func TestNewTime(test *testing.T) {
 	time := time.Now()
 	actual := newTime(time)
@@ -27,9 +21,8 @@ func TestNewTime(test *testing.T) {
 func TestNewTimeNow(test *testing.T) {
 	actual := newTimeNow()
 	expected := time.Now()
-	difTime, maxDiffSeconds := diffTimeAndMaxDiffSeconds(expected, actual)
 
-	assert.LessOrEqual(test, difTime, maxDiffSeconds)
+	assert.WithinDuration(test, expected, actual.Time, time.Second)
 }
 
 func TestHealthCheck(t *testing.T) {
@@ -51,9 +44,7 @@ func TestHealthCheck(t *testing.T) {
 	// Decode the response body
 	var actualTime timeStruct
 	err = json.Unmarshal(newRecord.Body.Bytes(), &actualTime)
+
 	assert.NoError(t, err)
-
-	difTime, maxDiffSeconds := diffTimeAndMaxDiffSeconds(expectedTime, actualTime)
-
-	assert.LessOrEqual(t, difTime, maxDiffSeconds)
+	assert.WithinDuration(t, expectedTime, actualTime.Time, time.Second)
 }
