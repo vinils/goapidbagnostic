@@ -3,6 +3,7 @@ package postgre
 import (
 	"fmt"
 
+	"github.com/vinils/goapitemplate/internal/repository"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -10,7 +11,11 @@ import (
 type repo struct {
 	connectionConfig ConnectionConfig
 	database         *gorm.DB
+	category         repository.ICategory
 }
+
+// Ensure that category implements the ICategory interface.
+var _ repository.ICategory = category{}
 
 // refactory review this code may not be here
 type ConnectionConfig struct {
@@ -39,6 +44,7 @@ func newReposotiry(cnnConfig ConnectionConfig, openConnection openConnection) (*
 	repo := &repo{
 		database:         db,
 		connectionConfig: cnnConfig,
+		category:         NewCategory(db),
 	}
 
 	return repo, err
