@@ -44,3 +44,14 @@ func (c category) Create(ctx *gin.Context, repo repository.ICategory) {
 
 	ctx.JSON(http.StatusCreated, createdCategory)
 }
+
+func (c category) List(ctx *gin.Context, repo repository.ICategory) {
+	categories, err := repo.List()
+
+	if err != nil {
+		sendError(ctx, http.StatusBadRequest, err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, categories)
+}

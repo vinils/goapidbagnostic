@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -146,4 +147,43 @@ func TestCreateCategory_WhenJSONBindError(t *testing.T) {
 
 	assert.Equal(t, expectedErrorStatus, response.Code)
 	assert.Contains(t, response.Body.String(), "unexpected EOF")
+}
+
+func TestListCategory(t *testing.T) {
+	expectedStatus := http.StatusOK
+	expectedCategories := []entity.Category{
+		entity.NewCategory("anyname1"),
+		entity.NewCategory("anyname2"),
+	}
+
+	ctx, response := getMockContext()
+	repo := repositoryMock{list: func() ([]entity.Category, error) { return expectedCategories, nil }}
+	NewCategory().List(ctx, repo)
+
+	// Assert the response body
+	var responseCategories []entity.Category
+	err := json.Unmarshal(response.Body.Bytes(), &responseCategories)
+	assert.Len(t, responseCategories, 2)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedCategories[0].Name, responseCategories[0].Name)
+	assert.WithinDuration(t, expectedCategories[0].CreatedAt, responseCategories[0].CreatedAt, time.Second)
+	assert.WithinDuration(t, expectedCategories[0].UpdatedAt, responseCategories[0].UpdatedAt, time.Second)
+	assert.Equal(t, expectedCategories[1].Name, responseCategories[1].Name)
+	assert.WithinDuration(t, expectedCategories[1].CreatedAt, responseCategories[1].CreatedAt, time.Second)
+	assert.WithinDuration(t, expectedCategories[1].UpdatedAt, responseCategories[1].UpdatedAt, time.Second)
+	assert.Equal(t, expectedStatus, response.Code)
+}
+
+func TestListCategory_WhenFail(t *testing.T) {
+	expectedStatus := http.StatusBadRequest
+	expectedErrorMsg := "any error"
+	expectedError := errors.New(expectedErrorMsg)
+
+	ctx, response := getMockContext()
+	repo := repositoryMock{list: func() ([]entity.Category, error) { return nil, expectedError }}
+	NewCategory().List(ctx, repo)
+
+	assert.Equal(t, expectedStatus, response.Code)
+	assert.Contains(t, response.Body.String(), expectedErrorMsg)
 }
