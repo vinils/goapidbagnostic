@@ -1,40 +1,26 @@
 package postgre
 
 import (
-	"fmt"
-
 	"github.com/vinils/goapitemplate/internal/repository"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 type repo struct {
-	connectionConfig ConnectionConfig
-	database         *gorm.DB
-	category         repository.ICategory
+	database *gorm.DB
+	category repository.ICategory
 }
 
 // Ensure that category implements the ICategory interface.
 var _ repository.ICategory = category{}
 
-// refactory review this code may not be here
-type ConnectionConfig struct {
-	Host     string
-	Port     int
-	User     string
-	DBName   string
-	Password string
-}
-
-func NewReposotiry(cnnConfig ConnectionConfig) (*repo, error) {
-	return newReposotiry(cnnConfig, gorm.Open)
+func NewReposotiry(cnnString string) (*repo, error) {
+	return newReposotiry(cnnString, gorm.Open)
 }
 
 type openConnection func(gorm.Dialector, ...gorm.Option) (*gorm.DB, error)
 
-func newReposotiry(cnnConfig ConnectionConfig, openConnection openConnection) (*repo, error) {
-	cnnString := getConnectionString(cnnConfig)
-
+func newReposotiry(cnnString string, openConnection openConnection) (*repo, error) {
 	db, err := openConnection(postgres.Open(cnnString), &gorm.Config{})
 
 	if err != nil {
@@ -42,15 +28,9 @@ func newReposotiry(cnnConfig ConnectionConfig, openConnection openConnection) (*
 	}
 
 	repo := &repo{
-		database:         db,
-		connectionConfig: cnnConfig,
-		category:         NewCategory(db),
+		database: db,
+		category: NewCategory(db),
 	}
 
 	return repo, err
-}
-
-func getConnectionString(config ConnectionConfig) string {
-	return fmt.Sprintf("host=%s port=%d user=%s dbname=%s password=%s",
-		config.Host, config.Port, config.User, config.DBName, config.Password)
 }
