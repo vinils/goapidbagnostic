@@ -26,5 +26,9 @@ func (c Category) IsValid() error {
 		return fmt.Errorf("name is required")
 	}
 
+	if len(c.Name) <= 2 {
+		return fmt.Errorf("lenght name has to be bigger than 2")
+	}
+
 	return nil
 }

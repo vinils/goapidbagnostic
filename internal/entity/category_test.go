@@ -30,3 +30,12 @@ func TestNewCategoryIsValid_WhenIsValid(test *testing.T) {
 
 	assert.Nil(test, err, "Expected nil, but got error")
 }
+
+func TestNewCategoryIsValid_WhenSmallerThan3(test *testing.T) {
+	nameSmallerthan3 := "b"
+	actual := NewCategory(nameSmallerthan3)
+	err := actual.IsValid()
+
+	assert.NotNil(test, err)
+	assert.EqualError(test, err, "lenght name has to be bigger than 2")
+}
