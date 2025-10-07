@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -15,12 +16,12 @@ import (
 )
 
 type repositoryMock struct {
-	create func(entity.Category) error
+	create func(entity.Category) (entity.Category, error)
 	list   func() ([]entity.Category, error)
 }
 
-func (r repositoryMock) List() ([]entity.Category, error) { return r.list() }
-func (r repositoryMock) Create(c entity.Category) error   { return r.create(c) }
+func (r repositoryMock) List() ([]entity.Category, error)                  { return r.list() }
+func (r repositoryMock) Create(c entity.Category) (entity.Category, error) { return r.create(c) }
 
 func TestMain(m *testing.M) {
 	gin.SetMode(gin.TestMode)
@@ -65,19 +66,40 @@ func (c requestBody) CastToByteBuffer() *bytes.Buffer {
 	return bytes.NewBuffer(json)
 }
 
+func (c requestBody) CastToCategory() entity.Category {
+	return entity.NewCategory(c.Name)
+}
+
 func TestCreateCategory(t *testing.T) {
 	expectedStatus := http.StatusCreated
 
 	requestBody := requestBody{Name: "anyname"}
 	ctx, response := getPostMockContext(requestBody.CastToByteBuffer())
-	repo := repositoryMock{create: func(c entity.Category) error { return nil }}
+	expectedCategory := requestBody.CastToCategory()
+	repo := repositoryMock{create: func(c entity.Category) (entity.Category, error) { return expectedCategory, nil }}
 
 	NewCategory().Create(ctx, repo)
 
 	var responseCategory entity.Category
 	err := json.Unmarshal(response.Body.Bytes(), &responseCategory)
+
 	assert.NoError(t, err)
-	assert.Equal(t, requestBody.Name, responseCategory.Name)
+	assert.Equal(t, expectedCategory.Name, responseCategory.Name)
+	assert.True(
+		t,
+		expectedCategory.CreatedAt.Equal(responseCategory.CreatedAt),
+		fmt.Sprintf(
+			"'CreatedAt' not equal! Expected: %s - Actual: %s",
+			expectedCategory.CreatedAt.String(),
+			responseCategory.CreatedAt.String()))
+	assert.True(
+		t,
+		expectedCategory.UpdatedAt.Equal(responseCategory.UpdatedAt),
+		fmt.Sprintf(
+			"'UpdatedAt' not equal! Expected: %s - Actual: %s",
+			expectedCategory.UpdatedAt.String(),
+			responseCategory.UpdatedAt.String()))
+
 	assert.Equal(t, expectedStatus, response.Code)
 }
 
@@ -87,7 +109,7 @@ func TestCreateCategory_WhenInvalidRequired(t *testing.T) {
 	invalidCategoryName := ""
 	body := requestBody{Name: invalidCategoryName}.CastToByteBuffer()
 	ctx, response := getPostMockContext(body)
-	repo := repositoryMock{create: func(c entity.Category) error { return nil }}
+	repo := repositoryMock{create: func(c entity.Category) (entity.Category, error) { return entity.Category{}, nil }}
 
 	NewCategory().Create(ctx, repo)
 
@@ -104,7 +126,7 @@ func TestCreateCategory_WhenCreateError(t *testing.T) {
 
 	body := requestBody{Name: "anyname"}.CastToByteBuffer()
 	ctx, response := getPostMockContext(body)
-	repo := repositoryMock{create: func(c entity.Category) error { return expectedError }}
+	repo := repositoryMock{create: func(c entity.Category) (entity.Category, error) { return entity.Category{}, expectedError }}
 
 	NewCategory().Create(ctx, repo)
 
