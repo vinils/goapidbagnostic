@@ -16,9 +16,10 @@ func TestNewRepositoryOpenConnection_WhenSuccess(test *testing.T) {
 	openSuccess := func(dialector gorm.Dialector, options ...gorm.Option) (*gorm.DB, error) {
 		return gormDb, nil
 	}
-
+	cat := NewCategory(gormDb)
 	expected := repo{
 		database: gormDb,
+		category: &cat,
 	}
 
 	actual, err := newReposotiry("any", openSuccess)
@@ -91,5 +92,5 @@ func TestCategory(test *testing.T) {
 
 	actual := repo.Category()
 
-	assert.Equal(test, NewCategory(gormDb), actual)
+	assert.Equal(test, repo.category, actual)
 }
