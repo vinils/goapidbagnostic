@@ -1,1 +1,12 @@
 GET http://localhost:{{$dotenv PORT}}/api/v1/healthcheck
+
+###
+GET http://localhost:{{$dotenv PORT}}/api/v1/categories
+
+###
+POST http://localhost:{{$dotenv PORT}}/api/v1/category
+Content-Type: application/json
+
+{
+    "Name": "Golang"
+}
