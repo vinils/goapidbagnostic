@@ -1,6 +1,7 @@
 package postgre
 
 import (
+	"github.com/vinils/goapitemplate/internal/entity"
 	"github.com/vinils/goapitemplate/internal/repository"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -33,4 +34,8 @@ func newReposotiry(cnnString string, openConnection openConnection) (*repo, erro
 	}
 
 	return repo, err
+}
+
+func (r *repo) MigrateModels() error {
+	return r.database.AutoMigrate(&entity.Category{})
 }
