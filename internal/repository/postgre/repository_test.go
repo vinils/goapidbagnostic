@@ -19,7 +19,6 @@ func TestNewRepositoryOpenConnection_WhenSuccess(test *testing.T) {
 
 	expected := repo{
 		database: gormDb,
-		Category: NewCategory(gormDb),
 	}
 
 	actual, err := newReposotiry("any", openSuccess)
@@ -81,4 +80,16 @@ func TestMigrateModels(test *testing.T) {
 	assert.NotNil(test, err)
 	err = mock.ExpectationsWereMet()
 	assert.NoError(test, err, "Unmet expectations: %v", err)
+}
+
+func TestCategory(test *testing.T) {
+	var gormDb *gorm.DB = nil
+
+	repo := repo{
+		database: gormDb,
+	}
+
+	actual := repo.Category()
+
+	assert.Equal(test, NewCategory(gormDb), actual)
 }

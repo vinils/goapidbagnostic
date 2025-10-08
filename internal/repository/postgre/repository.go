@@ -9,11 +9,10 @@ import (
 
 type repo struct {
 	database *gorm.DB
-	Category repository.ICategory
 }
 
 // Ensure that category implements the ICategory interface.
-var _ repository.ICategory = category{}
+var _ repository.IRepository = repo{}
 
 func NewReposotiry(cnnString string) (*repo, error) {
 	return newReposotiry(cnnString, gorm.Open)
@@ -30,7 +29,6 @@ func newReposotiry(cnnString string, openConnection openConnection) (*repo, erro
 
 	repo := &repo{
 		database: db,
-		Category: NewCategory(db),
 	}
 
 	return repo, err
@@ -38,4 +36,8 @@ func newReposotiry(cnnString string, openConnection openConnection) (*repo, erro
 
 func (r *repo) MigrateModels() error {
 	return r.database.AutoMigrate(&entity.Category{})
+}
+
+func (r repo) Category() repository.ICategory {
+	return NewCategory(r.database)
 }

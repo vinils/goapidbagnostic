@@ -3,7 +3,7 @@ package repository
 import "fmt"
 
 type IRepository interface {
-	ICategory
+	Category() ICategory
 }
 
 // refactory review this code may not be here
