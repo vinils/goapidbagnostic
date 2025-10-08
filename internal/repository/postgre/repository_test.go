@@ -43,7 +43,7 @@ func TestNewRepositoryOpenConnection_WhenFail(test *testing.T) {
 
 func TestNewRepository_WhenFail(test *testing.T) {
 	failCnnString := "any"
-	actual, err := NewReposotiry(failCnnString)
+	actual, err := NewRepository(failCnnString)
 
 	assert.Nil(test, actual)
 	assert.NotNil(test, err)

@@ -14,7 +14,7 @@ type repo struct {
 // Ensure that category implements the ICategory interface.
 var _ repository.IRepository = repo{}
 
-func NewReposotiry(cnnString string) (*repo, error) {
+func NewRepository(cnnString string) (*repo, error) {
 	return newReposotiry(cnnString, gorm.Open)
 }
 
