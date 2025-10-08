@@ -17,7 +17,7 @@ func TestNewRepositoryOpenConnection_WhenSuccess(test *testing.T) {
 
 	expected := repo{
 		database: gormDb,
-		category: NewCategory(gormDb),
+		Category: NewCategory(gormDb),
 	}
 
 	actual, err := newReposotiry("any", openSuccess)
