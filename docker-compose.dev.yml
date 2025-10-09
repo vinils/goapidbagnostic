@@ -1,8 +1,18 @@
 services:
-
   api:
-    network_mode: service:db
-    command: sleep infinity
+    build:
+      target: build
+    volumes:
+      - .:/app  # Mount current directory for live code changes
+    ports:
+      - "${PORT-8080}:${PORT-8080}"
+    command: go run main.go # Run directly, not the built binary
+    environment:
+      CNNSTR: "host=db port=5432 user=${DB_USER-postgres} dbname=${DB_DB-postgres} password=${DB_PASSWORD}"
 
   db:
+    environment:
+      POSTGRES_DB: ${DB_DB-postgres}
+      POSTGRES_USER: ${DB_USER-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     restart: unless-stopped
